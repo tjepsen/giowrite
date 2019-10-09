@@ -1,4 +1,4 @@
-module giowrite
+module github.com/tjepsen/giowrite
 
 go 1.13
 
