@@ -72,20 +72,30 @@ func loop(w *app.Window, s string) error {
 			gtx.Constraints.Height.Min = 0
 			text.Label{Material: material, Size: unit.Sp(72), Alignment: text.Middle, Text: message}.Layout(gtx, family)
 			dims := gtx.Dimensions
-			log.Println(dims)
+			//log.Println(dims)
 			op.TransformOp{}.Offset(f32.Point{Y: float32(dims.Size.Y)}).Add(gtx.Ops)
-			message += " 2"
+			//message += " 2"
 			text.Label{Material: material, Size: unit.Sp(72), Alignment: text.Middle, Text: message}.Layout(gtx, family)
 			material.Add(gtx.Ops)
-			paint.PaintOp{Rect: f32.Rectangle{
-				Min: f32.Point{X: 100, Y: 100},
-				Max: f32.Point{X: 200, Y: 200},
-			}}.Add(gtx.Ops)
-			paint.PaintOp{Rect: f32.Rectangle{
-				Min: f32.Point{X: float32(e.Size.X - 200), Y: 100},
-				Max: f32.Point{X: float32(e.Size.X-200) + 100, Y: 200},
-			}}.Add(gtx.Ops)
+			for i := 1; overlap(100*i, e.Size.X-(100*i)); i++ {
+				paint.PaintOp{Rect: f32.Rectangle{
+					Min: f32.Point{X: float32(100 * i), Y: float32(100 * i)},
+					Max: f32.Point{X: float32(100*i) + 100, Y: float32(100*i + 100)},
+				}}.Add(gtx.Ops)
+				paint.PaintOp{Rect: f32.Rectangle{
+					Min: f32.Point{X: float32(e.Size.X - 100*i + 0), Y: float32(100 * i)},
+					Max: f32.Point{X: float32(e.Size.X - 100*i + 100), Y: float32(100*i) + 100},
+				}}.Add(gtx.Ops)
+			}
 			w.Update(gtx.Ops)
 		}
 	}
+}
+
+func overlap(left, right int) bool {
+	log.Println(left, right)
+	if left < right {
+		return true
+	}
+	return false
 }
