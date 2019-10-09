@@ -61,14 +61,15 @@ func loop(w *app.Window, s string) error {
 		case app.UpdateEvent:
 			//cfg = e.Config
 			//faces.Reset(&cfg)
-			cs := layout.RigidConstraints(e.Size)
+			//cs := layout.RigidConstraints(e.Size)
 			gtx.Reset(&e.Config, e.Size)
 			gtx.Ops.Reset()
 			var material op.MacroOp
 			material.Record(gtx.Ops)
 			paint.ColorOp{Color: maroon}.Add(gtx.Ops)
 			material.Stop()
-			cs.Height.Min = 0
+
+			gtx.Constraints.Height.Min = 0
 			text.Label{Material: material, Size: unit.Sp(72), Alignment: text.Middle, Text: message}.Layout(gtx, family)
 			dims := gtx.Dimensions
 			log.Println(dims)
