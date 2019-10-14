@@ -13,10 +13,13 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/text"
-	"gioui.org/text/shape"
-	"gioui.org/unit"
+	"gioui.org/text/opentype"
+	"gioui.org/widget/material"
+	"golang.org/x/image/font/gofont/goitalic"
 	"golang.org/x/image/font/gofont/goregular"
-	"golang.org/x/image/font/sfnt"
+
+	//	"gioui.org/text/shape"
+	"gioui.org/unit"
 )
 
 func main() {
@@ -37,13 +40,23 @@ func loop(w *app.Window, s string) error {
 	gtx := &layout.Context{
 		Queue: w.Queue(),
 	}
-	regular, err := sfnt.Parse(goregular.TTF)
-	if err != nil {
-		panic("failed to load font")
-	}
-	family := &shape.Family{
-		Regular: regular,
-	}
+	/*
+		regular, err := sfnt.Parse(goregular.TTF)
+		if err != nil {
+			panic("failed to load font")
+		}
+		family := &shape.Family{
+			Regular: regular,
+		}
+	*/
+	shaper := new(text.Shaper)
+	shaper.Register(text.Font{}, opentype.Must(
+		opentype.Parse(goregular.TTF),
+	))
+	shaper.Register(text.Font{Style: text.Italic}, opentype.Must(
+		opentype.Parse(goitalic.TTF),
+	))
+	th := material.NewTheme(shaper)
 	//var cfg app.Config
 	//var faces shape.Faces
 	maroon := color.RGBA{127, 0, 0, 255}
@@ -58,7 +71,7 @@ func loop(w *app.Window, s string) error {
 		switch e := e.(type) {
 		case app.DestroyEvent:
 			return e.Err
-		case app.UpdateEvent:
+		case app.FrameEvent:
 			//cfg = e.Config
 			//faces.Reset(&cfg)
 			//cs := layout.RigidConstraints(e.Size)
@@ -70,24 +83,34 @@ func loop(w *app.Window, s string) error {
 			material.Stop()
 
 			gtx.Constraints.Height.Min = 0
-			text.Label{Material: material, Size: unit.Sp(72), Alignment: text.Middle, Text: message}.Layout(gtx, family)
+			//	text.Label{Material: material, Size: unit.Sp(72), Alignment: text.Middle, Text: message}.Layout(gtx, family)
+			lbl := th.Label(unit.Sp(72), message)
+			lbl.Color = maroon
+			lbl.Alignment = text.Middle
+			lbl.Layout(gtx)
 			dims := gtx.Dimensions
 			//log.Println(dims)
 			op.TransformOp{}.Offset(f32.Point{Y: float32(dims.Size.Y)}).Add(gtx.Ops)
 			//message += " 2"
-			text.Label{Material: material, Size: unit.Sp(72), Alignment: text.Middle, Text: message}.Layout(gtx, family)
-			material.Add(gtx.Ops)
+			//text.Label{Material: material, Size: unit.Sp(72), Alignment: text.Middle, Text: message}.Layout(gtx, family)
+			//material.Add(gtx.Ops)
+			lbl = th.Label(unit.Sp(72), message)
+			lbl.Color = maroon
+			lbl.Alignment = text.Middle
+			lbl.Layout(gtx)
+			paint.ColorOp{Color: maroon}.Add(gtx.Ops)
 			for i := 1; overlap(100*i, e.Size.X-(100*i)); i++ {
 				paint.PaintOp{Rect: f32.Rectangle{
 					Min: f32.Point{X: float32(100 * i), Y: float32(100 * i)},
 					Max: f32.Point{X: float32(100*i) + 100, Y: float32(100*i + 100)},
 				}}.Add(gtx.Ops)
 				paint.PaintOp{Rect: f32.Rectangle{
-					Min: f32.Point{X: float32(e.Size.X - 100*i + 0), Y: float32(100 * i)},
-					Max: f32.Point{X: float32(e.Size.X - 100*i + 100), Y: float32(100*i) + 100},
+					Min: f32.Point{X: float32(e.Size.X - (100*i + 100)), Y: float32(100 * i)},
+					Max: f32.Point{X: float32(e.Size.X - 100*i), Y: float32(100*i) + 100},
 				}}.Add(gtx.Ops)
 			}
-			w.Update(gtx.Ops)
+			//w.Update(gtx.Ops)
+			e.Frame(gtx.Ops)
 		}
 	}
 }
