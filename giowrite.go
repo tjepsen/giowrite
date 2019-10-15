@@ -9,14 +9,16 @@ import (
 
 	"gioui.org/app"
 	"gioui.org/f32"
+	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/text"
-	"gioui.org/text/opentype"
+
+	//"gioui.org/text/opentype"
 	"gioui.org/widget/material"
-	"golang.org/x/image/font/gofont/goitalic"
-	"golang.org/x/image/font/gofont/goregular"
+	//"golang.org/x/image/font/gofont/goitalic"
+	//"golang.org/x/image/font/gofont/goregular"
 
 	//	"gioui.org/text/shape"
 	"gioui.org/unit"
@@ -49,14 +51,17 @@ func loop(w *app.Window, s string) error {
 			Regular: regular,
 		}
 	*/
-	shaper := new(text.Shaper)
-	shaper.Register(text.Font{}, opentype.Must(
-		opentype.Parse(goregular.TTF),
-	))
-	shaper.Register(text.Font{Style: text.Italic}, opentype.Must(
-		opentype.Parse(goitalic.TTF),
-	))
-	th := material.NewTheme(shaper)
+	/*
+		shaper := new(text.Shaper)
+		shaper.Register(text.Font{}, opentype.Must(
+			opentype.Parse(goregular.TTF),
+		))
+		shaper.Register(text.Font{Style: text.Italic}, opentype.Must(
+			opentype.Parse(goitalic.TTF),
+		))
+		th := material.NewTheme(shaper)
+	*/
+	th := material.NewTheme()
 	//var cfg app.Config
 	//var faces shape.Faces
 	maroon := color.RGBA{127, 0, 0, 255}
@@ -69,13 +74,13 @@ func loop(w *app.Window, s string) error {
 	for {
 		e := <-w.Events()
 		switch e := e.(type) {
-		case app.DestroyEvent:
+		case system.DestroyEvent:
 			return e.Err
-		case app.FrameEvent:
+		case system.FrameEvent:
 			//cfg = e.Config
 			//faces.Reset(&cfg)
 			//cs := layout.RigidConstraints(e.Size)
-			gtx.Reset(&e.Config, e.Size)
+			gtx.Reset(e.Config, e.Size)
 			gtx.Ops.Reset()
 			var material op.MacroOp
 			material.Record(gtx.Ops)
@@ -84,7 +89,7 @@ func loop(w *app.Window, s string) error {
 
 			gtx.Constraints.Height.Min = 0
 			//	text.Label{Material: material, Size: unit.Sp(72), Alignment: text.Middle, Text: message}.Layout(gtx, family)
-			lbl := th.Label(unit.Sp(72), message)
+			lbl := th.H1(message)
 			lbl.Color = maroon
 			lbl.Alignment = text.Middle
 			lbl.Layout(gtx)
